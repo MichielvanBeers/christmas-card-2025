@@ -31,27 +31,11 @@ targetConfigs/
 *.lib
 *.a
 
-# Precompiled Headers
-*.gch
-*.pch
-
-# Dependency Files
-*.d
-*.dep
-
-# Backup files
-*~
-*.bak
-
-# MSP430-specific files
-MSP430*_CC.cmd
-lnk_msp430*.cmd
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+# Kernel Module Compile Results
+*.mod*
+*.cmd
+.tmp_versions/
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
