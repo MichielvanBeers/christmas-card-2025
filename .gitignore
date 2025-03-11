@@ -1,0 +1,57 @@
+# .gitignore for MSP430FR2355 Code Composer Studio Project
+
+# CCS Build Directories
+/Debug/
+/Release/
+/optimizerAssistant/
+
+# CCS Generated Files
+.config/
+.launches/
+.xdchelp
+targetConfigs/
+
+# CCS Project Files (some teams prefer to include these, but generally they're ignored)
+.ccsproject
+.cproject
+.project
+
+# CCS Settings Files
+.settings/
+
+# Compiled Object files
+*.o
+*.obj
+*.elf
+*.hex
+*.out
+*.map
+
+# Compiled Static libraries
+*.lib
+*.a
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Dependency Files
+*.d
+*.dep
+
+# Backup files
+*~
+*.bak
+
+# MSP430-specific files
+MSP430*_CC.cmd
+lnk_msp430*.cmd
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
