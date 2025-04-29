@@ -17,7 +17,8 @@ int main(void)
     ssd1306_clear_display();
 
     // Turn all pixels on
-    ssd1306_turn_all_pixels_on();
+    //ssd1306_turn_all_pixels_on();
+    ssd1306_print_text(0, 0, "Hello world");
 
     while(1){}
 

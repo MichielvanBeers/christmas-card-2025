@@ -1,6 +1,7 @@
 #include <msp430.h>
 #include <stdint.h>
 #include <string.h>
+#include "font_5x7.h"
 #include "i2c.h"
 
 unsigned char buffer[17];                                                     // buffer for data transmission to screen
@@ -18,8 +19,8 @@ unsigned char buffer[17];                                                     //
 #define SSD1306_I2C_ADDRESS             0x3C
 
 #define SSD1306_LCDWIDTH                128
-#define SSD1306_LCDHEIGHT               64
-#define SSD1306_128_64
+#define SSD1306_LCDHEIGHT               32
+#define SSD1306_128_32
 
 #define SSD1306_SETCONTRAST             0x81
 #define SSD1306_DISPLAYALLON_RESUME     0xA4
@@ -86,9 +87,9 @@ void ssd1306_init(void) {
     ssd1306_command(SSD1306_COMSCANDEC);
 
     ssd1306_command(SSD1306_SETCOMPINS);                                // 0xDA
-    ssd1306_command(0x12);
+    ssd1306_command(0x02);
     ssd1306_command(SSD1306_SETCONTRAST);                               // 0x81
-    ssd1306_command(0xCF);
+    ssd1306_command(0x8F);
 
     ssd1306_command(SSD1306_SETPRECHARGE);                              // 0xd9
     ssd1306_command(0xF1);
@@ -146,3 +147,48 @@ void ssd1306_command(unsigned char command) {
 
     i2c_write(SSD1306_I2C_ADDRESS, buffer, 2);
 }
+
+void ssd1306_set_position(uint8_t column, uint8_t page) {
+    if (column > 128) {
+        column = 0;                                                     // constrain column to upper limit
+    }
+
+    if (page > 8) {
+        page = 0;                                                       // constrain page to upper limit
+    }
+
+    ssd1306_command(SSD1306_COLUMNADDR);
+    ssd1306_command(column);                                            // Column start address (0 = reset)
+    ssd1306_command(SSD1306_LCDWIDTH-1);                                // Column end address (127 = reset)
+
+    ssd1306_command(SSD1306_PAGEADDR);
+    ssd1306_command(page);                                              // Page start address (0 = reset)
+    ssd1306_command(7);                                                 // Page end address
+}
+
+void ssd1306_print_text(uint8_t x, uint8_t y, char *ptString) {
+    ssd1306_set_position(x, y);
+
+    while (*ptString != '\0') {
+        buffer[0] = 0x40;
+
+        if ((x + 5) >= 127) {                                           // char will run off screen
+            x = 0;                                                      // set column to 0
+            y++;                                                        // jump to next page
+            ssd1306_set_position(x, y);                                 // send position change to OLED
+        }
+
+        uint8_t i;                                                      // Set variable to read font_5x7 array
+        for(i = 0; i< 5; i++) {                                         // Read the 5 x 8 bits for each font
+            buffer[i+1] = font_5x7[*ptString - ' '][i];                 // Push the values to the buffer
+        }
+
+        buffer[6] = 0x0;                                                // Add padding to separate the characters
+
+        i2c_write(SSD1306_I2C_ADDRESS, buffer, 7);                      // Write the buffer to the i2c bus
+        ptString++;
+        x+=6;                                                           // Move x position to after the current character
+    }
+}
+
+
