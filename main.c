@@ -3,8 +3,6 @@
 #include "i2c.h"
 #include "ssd1306.h"
 
-const char textBlock[55] = "Lieve Carmen, ik hoop dat je een hele fijne kerst hebt!";
-
 int main(void)
 {
     WDTCTL = WDTPW | WDTHOLD;   // stop watchdog timer
@@ -19,6 +17,7 @@ int main(void)
     ssd1306_clear_display();
 
     // Turn all pixels on
+    char textBlock[55] = "Lieve Carmen, ik hoop dat je een hele fijne kerst hebt!";
     ssd1306_print_text_block(0, 0, textBlock);
 
     while(1){}
