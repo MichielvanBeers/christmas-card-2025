@@ -3,6 +3,8 @@
 #include "i2c.h"
 #include "ssd1306.h"
 
+const char textBlock[55] = "Lieve Carmen, ik hoop dat je een hele fijne kerst hebt!";
+
 int main(void)
 {
     WDTCTL = WDTPW | WDTHOLD;   // stop watchdog timer
@@ -17,8 +19,7 @@ int main(void)
     ssd1306_clear_display();
 
     // Turn all pixels on
-    //ssd1306_turn_all_pixels_on();
-    ssd1306_print_text(0, 0, "Hello world");
+    ssd1306_print_text_block(0, 0, textBlock);
 
     while(1){}
 
@@ -33,7 +34,7 @@ int main(void)
 #pragma vector = EUSCI_B0_VECTOR
 __interrupt void b0_vector_isr(void) {
     if (TxByteCounter) {                                                    // Check TX byte counter
-        UCB0TXBUF = *PTxData++;                                         // Load TX buffer
+        UCB0TXBUF = *PTxData++;                                             // Load TX buffer
         TxByteCounter--;                                                    // Decrement TX byte counter
     }
 }

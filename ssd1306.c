@@ -122,14 +122,14 @@ void ssd1306_clear_display(void) {
     // Set page address range
     ssd1306_command(SSD1306_PAGEADDR);
     ssd1306_command(0);     // Start at page 0
-    ssd1306_command(7);     // End at page 7 (for 64-pixel height display)
+    ssd1306_command(3);     // End at page 3 (for 32-pixel height display)
 
     // Prepare buffer for data transmission (all zeros)
     buffer[0] = 0x40;       // Co = 0, D/C = 1 (data)
 
     // Each page is 128 columns wide
     // We'll send 16 bytes at a time (limited by our buffer size)
-    for (i = 0; i < 8; i++) {           // 8 pages for 64-pixel height
+    for (i = 0; i < 4; i++) {           // 4 pages for 32-pixel height
         for (j = 0; j < SSD1306_LCDWIDTH/16; j++) {  // 128 pixels width / 16 bytes
             // Fill buffer with zeros (starting from index 1)
             for (k = 1; k <= 16; k++) {
@@ -153,7 +153,7 @@ void ssd1306_set_position(uint8_t column, uint8_t page) {
         column = 0;                                                     // constrain column to upper limit
     }
 
-    if (page > 8) {
+    if (page > 3) {
         page = 0;                                                       // constrain page to upper limit
     }
 
@@ -163,7 +163,7 @@ void ssd1306_set_position(uint8_t column, uint8_t page) {
 
     ssd1306_command(SSD1306_PAGEADDR);
     ssd1306_command(page);                                              // Page start address (0 = reset)
-    ssd1306_command(7);                                                 // Page end address
+    ssd1306_command(3);                                                 // Page end address
 }
 
 void ssd1306_print_text(uint8_t x, uint8_t y, char *ptString) {
@@ -188,6 +188,51 @@ void ssd1306_print_text(uint8_t x, uint8_t y, char *ptString) {
         i2c_write(SSD1306_I2C_ADDRESS, buffer, 7);                      // Write the buffer to the i2c bus
         ptString++;
         x+=6;                                                           // Move x position to after the current character
+    }
+}
+
+void ssd1306_print_text_block(uint8_t x, uint8_t y, char *ptString) {
+    char word[20] = {0};
+    uint8_t i;
+    uint8_t j;
+    uint8_t endX = x;
+    uint8_t first_word_on_line = 1;
+
+    while (*ptString != '\0'){
+        for (j = 0; j < 20; j++) {                                      // Clear word buffer for each new word
+            word[j] = 0;
+        }
+
+        i = 0;
+        while ((*ptString != ' ') && (*ptString != '\0') && (i < 19)) { // Copy characters until space or end, with bounds check
+            word[i] = *ptString;
+            ptString++;
+            i++;
+        }
+
+        word[i] = '\0';                                                 // Ensure null termination
+
+        uint8_t word_width = i * 6;                                     // Calculate width of current word (number of characters * 6 pixels per character)
+
+        if (endX + word_width >= 127) {                                 // Check if the word would extend beyond the screen width
+            x = 0;
+            y++;
+            first_word_on_line = 1;
+        }
+
+        ssd1306_print_text(x, y, word);
+
+        x += word_width;
+        endX = x;
+
+        // Add a space after the word (if not at end of string)
+        if (*ptString == ' ') {
+            ptString++;  // Skip over the space in the input string
+            x += 6;
+            endX = x;
+        }
+
+        first_word_on_line = 0;
     }
 }
 
